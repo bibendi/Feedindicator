@@ -45,6 +45,7 @@ import time
 import gobject
 import shutil
 import sqlite3 as lite
+import re
 from threading import Thread
 from time import sleep
 from gconf import VALUE_BOOL, VALUE_INT, VALUE_STRING, VALUE_FLOAT
@@ -413,8 +414,13 @@ class FeedThread(Thread):
 			postdata = []
 			for val in rssfeed.entries:
 				val.title = string.replace(val.title, '\n', '')
-				if len(val.title) > 72:
-					substr = val.title[:72]
+				descr = re.sub('<[^<]+?>', '', val.description)
+				descr = string.replace(descr, '\n', '')
+				descr = string.replace(descr, val.title, ' ')
+				descr = re.sub(' +', ' ', descr)
+				val.title = val.title + '\n' + descr
+				if len(val.title) > 255:
+					substr = val.title[:255]
 					substr = substr.rpartition(' ')
 					if substr[0] != '':
 						val.title = substr[0] + '...'
